@@ -1,40 +1,108 @@
 .gameColorSquare {
-  width: 300px;
-  height: 300px;
+  --side: 290px;
+  width: var(--side);
+  height: var(--side);
   position: relative;
+  margin: 0 auto;
 }
-/* WITCH BODY BUT NOT HAT */
-.witch {
+
+.witchHat,
+.witchHead,
+.witchBody {
   position: absolute;
-  width: 100%;
-  height: 75%;
-  background-color: inherit;
-  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
-
 .witchHead {
-  width: 50px;
-  height: 50px;
+  width: 25%;
+  height: 25%;
   border-radius: 50%;
-    position: absolute;
-
-    /* temp positioning  */
-    top: 30%;
-    left: calc(50% - 25px);
+  top: 30%;
 }
 
+.witchBody {
+  position: relative;
+  top: 45%;
+  width: 50%;
+  height: 50%;
+}
+
+.witchDress {
+  aspect-ratio: 1 / cos(30deg);
+  clip-path: polygon(50% 0%, 22% 100%, 78% 100%);
+}
+
+.rArm,
+.lArm {
+  position: absolute;
+  width: 30%;
+  height: 3%;
+}
+
+.rLeg,
+.lLeg {
+  position: absolute;
+  height: 20%;
+  width: 3%;
+}
+
+.rArm,
+.lArm {
+  top: 35%;
+}
+
+.rArm {
+  left: 60%;
+  transform: rotate(-45deg);
+  transform-origin: bottom left;
+}
+.lArm {
+  left: 10%;
+  transform: rotate(45deg);
+  transform-origin: bottom right;
+}
+.rLeg {
+  left: 43%;
+}
+.lLeg {
+  right: 43%;
+}
 
 /* WITCH HAT  */
-
 .witchHat {
-    position: absolute;
-  width: 100%;
-  height: 50%;
-  background-color: inherit;
+  position: absolute;
+  width: 50%;
+  top: 2%;
+  height: 35%;
+}
+
+.witchHatPeak {
+  aspect-ratio: 1 / cos(30deg);
+  clip-path: polygon(50% 0%, 33% 78%, 67% 78%);
 }
 
 .witchHatBrim {
-  width:100px;
-  height: 40px;
+  position: absolute;
+  width: 100%;
+  height: 25%;
   border-radius: 50%;
+  bottom: -10%;
+}
+
+@media screen and (min-width: 425px) {
+  .gameColorSquare {
+    --side: 350px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .gameColorSquare {
+    --side: 450px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .gameColorSquare {
+    --side: 500px;
+  }
 }

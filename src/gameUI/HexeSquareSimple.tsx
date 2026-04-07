@@ -5,28 +5,47 @@ const HexeSquareSimple = ({
   gameColor,
   contrastColor,
   userColor,
-}: GameColors) => {
+  className,
+}: GameColors & { className?: string }) => {
+  // classname prop for when this component is solo (easy mode) or with another square (hard mode)
   console.log('target color is ', gameColor);
   console.log('user color is ', userColor);
   console.log('contrast color is ', contrastColor);
   return (
     <div
-      className={classes.gameColorSquare}
+      className={`${classes.gameColorSquare} ${className ?? ''}`}
       style={{ backgroundColor: gameColor }}
     >
-      <div className={classes.witch}>
+      <div
+        className={classes.witchHead}
+        style={{ backgroundColor: userColor }}
+      />
+      <div className={classes.witchBody}>
         <div
-          className={classes.witchHead}
+          className={classes.witchDress}
           style={{ backgroundColor: userColor }}
-        ></div>
-        <div
-          className={classes.witchBody}
+        />
+
+        <span
+          className={classes.rArm}
           style={{ backgroundColor: userColor }}
-        ></div>
+        ></span>
+        <span
+          className={classes.lArm}
+          style={{ backgroundColor: userColor }}
+        ></span>
+        <span
+          className={classes.rLeg}
+          style={{ backgroundColor: userColor }}
+        ></span>
+        <span
+          className={classes.lLeg}
+          style={{ backgroundColor: userColor }}
+        ></span>
       </div>
       <div className={classes.witchHat}>
         <div
-          className={classes.witchHatPoint}
+          className={classes.witchHatPeak}
           style={{ backgroundColor: contrastColor }}
         ></div>
         <div

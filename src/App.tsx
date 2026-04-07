@@ -5,7 +5,6 @@ import HexeSquareSimple from './gameUI/HexeSquareSimple.tsx';
 import HexeComplex from './gameUI/HexeComplex.tsx';
 import HexWordle from './gameUI/HexWordle.tsx';
 
-
 import classes from './App.module.css';
 
 const MAX_GUESSES = 5;
@@ -107,10 +106,28 @@ function App() {
           </section>
         )}
         {gameMode !== null && gameRunning && (
-          <section>
-            {gameMode === 'easy' && <HexeSquareSimple gameColor={gameColor} contrastColor={contrastColor} userColor={userColor}/>}
-              {gameMode === 'medium' && <HexWordle gameColor={gameColor} contrastColor={contrastColor} userColor={userColor}/>}
-                {gameMode === 'hard' && <HexeComplex gameColor={gameColor} contrastColor={contrastColor} userColor={userColor}/>}
+          <section className={classes.colorSquareSection}>
+            {gameMode === 'easy' && (
+              <HexeSquareSimple
+                gameColor={gameColor}
+                contrastColor={contrastColor}
+                userColor={userColor}
+              />
+            )}
+            {gameMode === 'medium' && (
+              <HexWordle
+                gameColor={gameColor}
+                contrastColor={contrastColor}
+                userColor={userColor}
+              />
+            )}
+            {gameMode === 'hard' && (
+              <HexeComplex
+                gameColor={gameColor}
+                contrastColor={contrastColor}
+                userColor={userColor}
+              />
+            )}
           </section>
         )}
         <div></div>
