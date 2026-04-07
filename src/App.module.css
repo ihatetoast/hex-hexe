@@ -17,8 +17,3 @@
   justify-content: center;
 }
 
-.gameColorSquare,
-.targetColorSquare {
-    width: 125px;
-  height: 125px;
-}

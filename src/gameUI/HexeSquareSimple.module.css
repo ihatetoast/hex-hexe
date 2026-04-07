@@ -1,0 +1,40 @@
+.gameColorSquare {
+  width: 300px;
+  height: 300px;
+  position: relative;
+}
+/* WITCH BODY BUT NOT HAT */
+.witch {
+  position: absolute;
+  width: 100%;
+  height: 75%;
+  background-color: inherit;
+  bottom: 0;
+}
+
+.witchHead {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+    position: absolute;
+
+    /* temp positioning  */
+    top: 30%;
+    left: calc(50% - 25px);
+}
+
+
+/* WITCH HAT  */
+
+.witchHat {
+    position: absolute;
+  width: 100%;
+  height: 50%;
+  background-color: inherit;
+}
+
+.witchHatBrim {
+  width:100px;
+  height: 40px;
+  border-radius: 50%;
+}

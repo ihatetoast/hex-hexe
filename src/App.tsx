@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import type { GameMode } from './types.ts';
 import Header from './components/Header';
+import HexeSquareSimple from './gameUI/HexeSquareSimple.tsx';
+import HexeComplex from './gameUI/HexeComplex.tsx';
+import HexWordle from './gameUI/HexWordle.tsx';
+
 
 import classes from './App.module.css';
+
 const MAX_GUESSES = 5;
 function App() {
   const [gameRunning, setGameRunning] = useState<boolean>(false);
   const [gameColor, setGameColor] = useState<string>(getRandomColor());
   const [userColor, setUserColor] = useState<string>('');
-  const [hexenhutColor, setHexenhutColor] = useState<string>('');
+  const [contrastColor, setContrastColor] = useState<string>('');
   const [gameMode, setGameMode] = useState<GameMode | null>(null);
   const [guesses, setGuesses] = useState<number>(0);
 
@@ -48,7 +53,7 @@ function App() {
     const compColor = getComplementaryColor(gameColor);
     setGameRunning(true);
     setUserColor(compColor);
-    setHexenhutColor(compColor);
+    setContrastColor(compColor);
   };
 
   return (
@@ -103,23 +108,9 @@ function App() {
         )}
         {gameMode !== null && gameRunning && (
           <section>
-            <div className={classes.squaresContainer}>
-              <div
-                className={classes.targetColorSquare}
-                style={{ backgroundColor: gameColor }}
-              >
-                <div className={classes.hangGameSquare}>
-                  <div className={classes.witch}>
-                    <div className={classes.witchHead} style={{backgroundColor:userColor}}></div>
-                    <div className={classes.witchBody} style={{backgroundColor:userColor}}></div>
-                  </div>
-                  <div className={classes.witchHat}>
-                    <div className={classes.witchHatPoint} style={{backgroundColor:hexenhutColor}}></div>
-                    <div className={classes.witchHatBrim} style={{backgroundColor:hexenhutColor}}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {gameMode === 'easy' && <HexeSquareSimple gameColor={gameColor} contrastColor={contrastColor} userColor={userColor}/>}
+              {gameMode === 'medium' && <HexWordle gameColor={gameColor} contrastColor={contrastColor} userColor={userColor}/>}
+                {gameMode === 'hard' && <HexeComplex gameColor={gameColor} contrastColor={contrastColor} userColor={userColor}/>}
           </section>
         )}
         <div></div>
