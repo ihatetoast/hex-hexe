@@ -1,3 +1,7 @@
+.gameBoard {
+  padding: 1rem;
+}
+
 .targetColorSample {
   width: 100px;
   height: 100px;
@@ -19,56 +23,29 @@
   padding: 1rem;
 }
 
-/* EASY LEVEL / ONE GUESS AT A TIME MODE  */
-.guessesContainer {
+.inputContainer {
+  margin-top: 1rem;
   display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-}
-
-.guessBox {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
+  gap: 1rem;
   justify-content: center;
   align-items: center;
-  font-size: 1.2rem;
-  border-width: 3px;
+  color: var(--text-h);
+}
+
+.gameControls p,
+.inputContainer label  {
+  font-size: 1.5rem;
+    color: var(--text-h);
+}
+.inputContainer input {
+    width: 30px;
+  height: 30px;
+  appearance: none;
+  border: 0;
   border-style: solid;
   border-radius: 5px;
-  background-color: var(--text-h);
-  color: var(--bg);
+  border-width: 5px;
+  font-size: 1.75rem;
+  text-align:center
 }
 
-.guessBox.correct {
-  border-color: transparent;
-    background-color: #000;
-    color: #00ff00;
-}
-
-.guessBox.incorrect {
-  border-color: #00ff00;
-  background-color: var(--text-h);
-  color: var(--bg);
-}
-
-.guessBox.correct {
-  border-color: transparent;
-}
-
-.guessBox:nth-child(-n + 2).incorrect {
-  border-color: #ff0000;
-}
-
-.guessBox:nth-child(-n + 2).correct {
-  color: #ff0000;
-}
-
-
-.guessBox:nth-last-child(-n + 2).incorrect {
-  border-color: #00BFFF;
-}
-
-.guessBox:nth-last-child(-n + 2).correct {
-  color: #00BFFF;
-}
