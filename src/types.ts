@@ -4,3 +4,5 @@ export type GameColors = {
   userColor: string;
   contrastColor: string;
 };
+
+export type HexDigit = { val: string; correct: boolean };
