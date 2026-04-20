@@ -1,7 +1,7 @@
-import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect, useRef, RefObject } from 'react';
 import type { GameMode, HexDigit } from './types.ts';
 import Header from './components/Header';
+import MessageBlock from './components/MessageBlock.tsx';
 import HexeSquareSimple from './gameUI/HexeSquareSimple.tsx';
 import HexeComplex from './gameUI/HexeComplex.tsx';
 import HexWordle from './gameUI/HexWordle.tsx';
@@ -9,26 +9,30 @@ import HexadecimalBoard from './gameUI/HexadecimalBoard.tsx';
 
 import classes from './App.module.css';
 
-const MAX_GUESSES = 6;
+const MAX_GUESSES = 10;
 function App() {
+  const inputRef = useRef<HTMLInputElement>(null);
   // general game state
   const [gameRunning, setGameRunning] = useState<boolean>(false);
   const [gameMode, setGameMode] = useState<GameMode | null>(null);
-  const [guesses, setGuesses] = useState<number>(0); 
+  const [message, setMessage] = useState<string | null>(null);
 
   //color state
-  const [gameColor, setGameColor] = useState<string>(getRandomColor());  
+  const [gameColor, setGameColor] = useState<string>(getRandomColor());
   const [contrastColor, setContrastColor] = useState<string>('');
   const [userColor, setUserColor] = useState<HexDigit[]>(
     Array.from({ length: 6 }, () => ({ val: '0', correct: false })),
   );
 
-// game play, guess validation state
+  // game play, guess validation state
   const [inputVal, setInputVal] = useState<string>('');
-  const [easyHexVals, setEasyHexVals] = useState<string[]>([]);
-
-  const isGameOver = `#${userColor}` === gameColor || guesses === MAX_GUESSES;
-
+  const [currentGuess, setCurrentGuess] = useState<string>('');
+  const [badGuesses, setBadGuesses] = useState<string[]>([]);
+  
+  // game over state 
+  const [userWon, setUserWon] =  useState<boolean>(false) ;
+  const [userLost, setUserLost] = useState<boolean>(false);
+  const isGameOver = userWon || userLost;
 
   const getComplementaryColor = (color: string) => {
     // convert hex to rgb, subtract each rgb from 255
@@ -58,40 +62,63 @@ function App() {
     setContrastColor(compColor);
   };
 
-// TODO: 
-// when a user inputs a digit, validate that it is 0-F (in input and via logic, trust no one)
-// IFF there was an error message, clear when the user clicks in the input or after it's valid?
-// if that is a valid option, check if it's in the guesses array
-// if it IS in the guesses array, address error message (replace label text or add class to a note about valid input options)
-// if it IS NOT in the guesses array, add it 
-// AND check guesses array with goalColor to replace digits, setUserColor to this color, clear input
-// add to bad guesses arr if it is not in the hexadecimal and display bad guesses so they know what they have done. 
-// ?? let bad guess length be how we derive game over?
+   useEffect(() => {
+    inputRef.current?.focus(); 
+  }, [])
+  
 
-// later TODO (game over todo)
-// if they won, the hexe should be same color as surrounding field. animate hat falling to the floor
-// if they lost, display a meh look to the witch and have a random set of comments.
-// change gmae mode to null to return to home
+  useEffect(() => {
+    if (!gameColor.includes(currentGuess)) {
+      // add to bad guesses array
+      setBadGuesses((prev) => [currentGuess, ...prev]);
+      return;
+    }
+    const tempUserHex = userColor.map((deepEl) => ({ ...deepEl }));
+    gameColor
+      .replace('#', '')
+      .split('')
+      .map((el, idx) => {
+        if (el === currentGuess) {
+          tempUserHex[idx].val = el;
+          tempUserHex[idx].correct = true;
+        }
+      });
+    setUserColor(tempUserHex);
+  }, [currentGuess, gameColor]);
+
+// needs work
+  useEffect(() =>{
+    // check for user won or lost
+    if(userLost){
+      setMessage("You were not worthy!")
+    }
+    if(userWon) {
+      setMessage("You helped the Hex Hexe to hexcape!")
+    }
+  },[userColor, badGuesses])
+  console.log(isGameOver); // bug
 
   const handleHexaDecChange = (userGuess: string) => {
     const hexRegex = /^[0-9a-fA-F]*$/;
 
     if (hexRegex.test(userGuess)) {
-      console.log('input is valid');
       const guess = userGuess.toUpperCase();
 
-      // only push valit ones to array.
-      if (!easyHexVals.includes(guess)) {
-        setEasyHexVals((prev) => [guess, ...prev]);
-      }
+      setCurrentGuess(guess);
     } else {
-      console.log('input is invalid');
+      setMessage('Whoops! Input is invalid');
     }
   };
 
   const checkGuess = () => {
-    console.log('game color is ', gameColor);
-    console.log(' easy hex vals is ', easyHexVals);
+    handleHexaDecChange(inputVal);
+    setInputVal('');
+    inputRef?.current?.focus();
+  };
+
+  const getUserColorHex = (arr: HexDigit[]) => {
+    const hexVal = arr.map((el) => el.val).join('');
+    return `#${hexVal}`;
   };
 
   return (
@@ -160,7 +187,9 @@ function App() {
                 gameColor={gameColor}
                 contrastColor={contrastColor}
                 userColor={
-                  guesses === 0 ? contrastColor : `#${userColor.join('')}`
+                  currentGuess === ''
+                    ? contrastColor
+                    : getUserColorHex(userColor)
                 }
               />
             )}
@@ -183,6 +212,8 @@ function App() {
         <section className={classes.gameControls}>
           {gameMode === 'easy' && gameRunning && (
             <>
+              <MessageBlock guesses={badGuesses} message={message}/>
+
               <HexadecimalBoard userColor={userColor} />
               <div>
                 <p>Enter a valid hexadecimal digit (0—9 or A–F)</p>
@@ -196,11 +227,15 @@ function App() {
                     maxLength={1}
                     pattern='[0-9a-fA-F]+'
                     placeholder='?'
+                    ref={inputRef}
+                    onFocus={() => setMessage(null)}
                     value={inputVal}
-                    onChange={(e) => setInputVal(e.target.value) }
+                    onChange={(e) => setInputVal(e.target.value)}
+                    autoComplete="off"
                   />
                   <button
                     onClick={checkGuess}
+                    onKeyDown={(e) => (e.key === 'Enter' ? checkGuess() : '')}
                   >
                     enter
                   </button>

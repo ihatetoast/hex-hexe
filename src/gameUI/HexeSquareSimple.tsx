@@ -8,9 +8,6 @@ const HexeSquareSimple = ({
   className,
 }: GameColors & { className?: string }) => {
   // classname prop for when this component is solo (easy mode) or with another square (hard mode)
-  // console.log('target color is ', gameColor);
-  console.log('user color is ', userColor);
-  // console.log('contrast color is ', contrastColor);
 
   return (
     <div
