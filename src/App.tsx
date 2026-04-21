@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, RefObject } from 'react';
+import { useState, useEffect, useRef, type ChangeEvent } from 'react';
 import type { GameMode, HexDigit } from './types.ts';
 import Header from './components/Header';
 import MessageBlock from './components/MessageBlock.tsx';
@@ -15,7 +15,6 @@ function App() {
   // general game state
   const [gameRunning, setGameRunning] = useState<boolean>(false);
   const [gameMode, setGameMode] = useState<GameMode | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
 
   //color state
   const [gameColor, setGameColor] = useState<string>(getRandomColor());
@@ -26,24 +25,26 @@ function App() {
 
   // game play, guess validation state
   const [inputVal, setInputVal] = useState<string>('');
-  const [currentGuess, setCurrentGuess] = useState<string>('');
   const [badGuesses, setBadGuesses] = useState<string[]>([]);
-  
-  // game over state 
-  const [userWon, setUserWon] =  useState<boolean>(false) ;
-  const [userLost, setUserLost] = useState<boolean>(false);
+  const [inputError, setInputError] = useState<string | null>(null);
+
+  // game over state
+  const userWon = getUserColorHex(userColor) === gameColor;
+  const userLost = badGuesses.length === MAX_GUESSES;
   const isGameOver = userWon || userLost;
 
+  const message = userLost
+    ? `The correct formula to help her disappear into the smoke was ${gameColor}. Alas, she is stuck here to be tortured by khakis and ecru.`
+    : userWon
+      ? 'You helped the Hex Hexe to hexcape!'
+      : null;
+
   const getComplementaryColor = (color: string) => {
-    // convert hex to rgb, subtract each rgb from 255
-    // convert rgb to hex
     const stripped = color.replace('#', '');
-    // get red, green, blue: and conv to hex (0-255)
     const [r, g, b] = (stripped.match(/.{2}/g) ?? []).map((colVal) => {
       const chan = 255 - parseInt(colVal, 16);
       return chan.toString(16).padStart(2, '0');
     });
-
     return `#${r}${g}${b}`;
   };
 
@@ -62,64 +63,69 @@ function App() {
     setContrastColor(compColor);
   };
 
-   useEffect(() => {
-    inputRef.current?.focus(); 
-  }, [])
-  
-
-  useEffect(() => {
-    if (!gameColor.includes(currentGuess)) {
-      // add to bad guesses array
-      setBadGuesses((prev) => [currentGuess, ...prev]);
-      return;
-    }
-    const tempUserHex = userColor.map((deepEl) => ({ ...deepEl }));
-    gameColor
-      .replace('#', '')
-      .split('')
-      .map((el, idx) => {
-        if (el === currentGuess) {
-          tempUserHex[idx].val = el;
-          tempUserHex[idx].correct = true;
-        }
-      });
-    setUserColor(tempUserHex);
-  }, [currentGuess, gameColor]);
-
-// needs work
-  useEffect(() =>{
-    // check for user won or lost
-    if(userLost){
-      setMessage("You were not worthy!")
-    }
-    if(userWon) {
-      setMessage("You helped the Hex Hexe to hexcape!")
-    }
-  },[userColor, badGuesses])
-  console.log(isGameOver); // bug
-
-  const handleHexaDecChange = (userGuess: string) => {
-    const hexRegex = /^[0-9a-fA-F]*$/;
-
-    if (hexRegex.test(userGuess)) {
-      const guess = userGuess.toUpperCase();
-
-      setCurrentGuess(guess);
-    } else {
-      setMessage('Whoops! Input is invalid');
-    }
+  const handleStartSameGame = () => {
+    // game colors
+    const newColor = getRandomColor();
+    const newContrastColor = getComplementaryColor(newColor);
+    setGameColor(newColor);
+    setContrastColor(newContrastColor);
+    setUserColor(
+      Array.from({ length: 6 }, () => ({ val: '0', correct: false })),
+    );
+    // rest of game state
+    setBadGuesses([]);
+    setInputVal('');
   };
 
-  const checkGuess = () => {
-    handleHexaDecChange(inputVal);
+  const handleStartNewGame = () => {
+    handleStartSameGame();
+    setGameRunning(false);
+    setGameMode(null);
+  };
+
+  const checkGuess = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (inputVal === '') return;
+
+    const guess = inputVal.toUpperCase();
+    if (!gameColor.includes(guess)) {
+      setBadGuesses((prev) => [guess, ...prev]);
+    } else {
+      const tempUserHex = userColor.map((deepEl) => ({ ...deepEl }));
+      gameColor
+        .replace('#', '')
+        .split('')
+        .map((el, idx) => {
+          if (el === guess) {
+            tempUserHex[idx].val = el;
+            tempUserHex[idx].correct = true;
+          }
+        });
+      setUserColor(tempUserHex);
+    }
     setInputVal('');
     inputRef?.current?.focus();
   };
 
-  const getUserColorHex = (arr: HexDigit[]) => {
+  function getUserColorHex(arr: HexDigit[]): string {
     const hexVal = arr.map((el) => el.val).join('');
     return `#${hexVal}`;
+  }
+
+  const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const hexRegex = /^[0-9a-fA-F]*$/;
+    if (!hexRegex.test(val)) {
+      setInputError('Whoops! Please enter a valid hexidecimal value: ');
+      return;
+    }
+    setInputVal(val);
+    setInputError(null);
   };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   return (
     <>
@@ -127,18 +133,21 @@ function App() {
       <main className={classes.gameBoard}>
         {gameMode === null && !gameRunning && (
           <section>
-            <p>
-              Hex color codes are a 6-digit combination ranging from 0 – 9 then
-              A – F. These digits are paired to represent red, green, and blue.
-            </p>
-            <p>
-              The color you are trying to guess is the background of the square.
-              Your guesses will be reflected in the witch's body.{' '}
-            </p>
-            <p>
-              Correctly guess the hexadecimal to help the Hex Hexe vanish. If
-              you fail, expect some biting sarcasm.
-            </p>
+            <div className={classes.gameIntro}>
+              <p>
+                Hex color codes are a 6-digit combination ranging from 0–9
+                then A–F. These digits are paired to represent red, green, and
+                blue.
+              </p>
+              <p>
+                The color you are trying to guess is the background of the
+                square. Your guesses will be reflected in the witch's body.
+              </p>
+              <p>
+                Correctly guess the hexadecimal to help the Hex Hexe vanish. If
+                you fail, expect some biting sarcasm.
+              </p>
+            </div>
 
             <div>
               <div>
@@ -187,9 +196,9 @@ function App() {
                 gameColor={gameColor}
                 contrastColor={contrastColor}
                 userColor={
-                  currentGuess === ''
-                    ? contrastColor
-                    : getUserColorHex(userColor)
+                  userColor.some((d) => d.correct)
+                    ? getUserColorHex(userColor)
+                    : contrastColor
                 }
               />
             )}
@@ -212,12 +221,29 @@ function App() {
         <section className={classes.gameControls}>
           {gameMode === 'easy' && gameRunning && (
             <>
-              <MessageBlock guesses={badGuesses} message={message}/>
-
-              <HexadecimalBoard userColor={userColor} />
+              <MessageBlock guesses={badGuesses} message={message} />
+              {!isGameOver && <HexadecimalBoard userColor={userColor} />}
               <div>
-                <p>Enter a valid hexadecimal digit (0—9 or A–F)</p>
-                <div className={classes.inputContainer}>
+                {isGameOver && (
+                  <>
+                    <p>Play the same game or a new game?</p>
+                    <button onClick={handleStartSameGame}>Same game!</button>
+                    <button onClick={handleStartNewGame}>New game!</button>
+                  </>
+                )}
+                {!isGameOver && (
+                  <p
+                    className={`${classes.inputInstructions} ${inputError ? classes.error : ''}`}
+                  >
+                    {inputError ? (
+                      <span>{inputError}</span>
+                    ) : (
+                      <span>Enter a valid hexadecimal digit: </span>
+                    )}
+                    (0—9 or A–F)
+                  </p>
+                )}
+                <form className={classes.inputContainer} onSubmit={checkGuess}>
                   {' '}
                   <label htmlFor='userGuess'>Your guess: </label>
                   <input
@@ -228,18 +254,13 @@ function App() {
                     pattern='[0-9a-fA-F]+'
                     placeholder='?'
                     ref={inputRef}
-                    onFocus={() => setMessage(null)}
                     value={inputVal}
-                    onChange={(e) => setInputVal(e.target.value)}
-                    autoComplete="off"
+                    autoFocus
+                    onChange={handleOnChange}
+                    autoComplete='off'
                   />
-                  <button
-                    onClick={checkGuess}
-                    onKeyDown={(e) => (e.key === 'Enter' ? checkGuess() : '')}
-                  >
-                    enter
-                  </button>
-                </div>
+                  <input type='submit' value='enter' />
+                </form>
               </div>
             </>
           )}

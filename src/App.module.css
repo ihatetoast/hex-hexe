@@ -1,3 +1,20 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.gameIntro {
+  width: 100%;
+  max-width: 500px;
+  text-align: left;
+  margin: 0 auto;
+}
+
+.gameIntro p {
+  margin-bottom: 1rem;
+}
+
 .gameBoard {
   padding: 1rem;
 }
@@ -33,19 +50,54 @@
 }
 
 .gameControls p,
-.inputContainer label  {
-  font-size: 1.5rem;
-    color: var(--text-h);
+.inputContainer label {
+  font-size: 1rem;
+  color: var(--text-h);
 }
-.inputContainer input {
-    width: 30px;
-  height: 30px;
+.inputInstructions:not(.error) {
+  color: var(--text-h);
+}
+.inputInstructions.error {
+  color: var(--error);
+}
+
+.inputContainer input[type='text'] {
+  width: 40px;
+  height: 40px;
   appearance: none;
   border: 0;
   border-style: solid;
   border-radius: 5px;
-  border-width: 5px;
+  border-width: 3px;
   font-size: 1.75rem;
-  text-align:center
+  text-align: center;
 }
 
+.inputContainer input[type='submit'] {
+  height: 40px;
+  padding: 0 1rem;
+  appearance: none;
+  border: 0;
+  border-style: solid;
+  border-radius: 50px;
+  border-width: 2px;
+  font-size: 1rem;
+  text-align: center;
+  background-color: var(--text-h);
+  color: var(--bg);
+}
+
+.inputContainer input[type='submit']:hover {
+  background-color: var(--bg);
+  color: var(--text-h);
+}
+
+@media screen and (min-width: 1054px) {
+  .gameControls p,
+  .inputContainer label {
+    font-size: 1.5rem;
+  }
+  .inputContainer input[type='submit']  {
+    font-size: 1.5rem;
+  }
+}

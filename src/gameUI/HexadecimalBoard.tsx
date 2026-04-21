@@ -17,7 +17,7 @@ const HexadecimalBoard = ({userColor}: Props) => {
             key={idx}
             className={`${classes.guessBox} ${classes[resultsClass]}`}
           >
-            {el.val}
+            {el.correct ? el.val : el.val === "0" ? "?" : el.val}
           </span>
         );
       })}
